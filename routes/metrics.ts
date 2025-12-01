@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2026 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
@@ -67,7 +67,8 @@ export function serveMetrics () {
   return async (req: Request, res: Response, next: NextFunction) => {
     challengeUtils.solveIf(challenges.exposedMetricsChallenge, () => {
       const userAgent = req.headers['user-agent'] ?? ''
-      return !userAgent.includes('Prometheus')
+      const ignoredUserAgents = config.get<string[]>('challenges.metricsIgnoredUserAgents')
+      return !ignoredUserAgents.some((ignoredUserAgent) => userAgent.includes(ignoredUserAgent))
     })
     res.set('Content-Type', register.contentType)
     res.end(await register.metrics())
